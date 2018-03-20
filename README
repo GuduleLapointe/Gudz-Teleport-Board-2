@@ -1,40 +1,47 @@
-Gudule's Teleport Board 2
-Version 2.0.0
+# Gudule's Teleport Board 2
+
 Get the latest version on Github:
-https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
+    https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 
-(c) Gudule Lapointe 2016-2018
-This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
-of Jeff Kelley' 2010 HGBoard script. Very few of the original code was kept
-(except mainly the drawing engine).
+## Features:
 
-This script is licensed under Creative Commons BY-NC-SA
-See <http://creativecommons.org/licenses/by-nc-sa/3.0/>
-You may not use this work for commercial purposes.
-You must attribute the work to the authors, Jeff Kelley and Gudule Lapointe
-You may distribute, alter, transform, or build upon this work
-as long as you do not delete the name of the original authors.
+* Single or Multi-columns teleport buttons
+* Destinations are checked at start and every hour to avoid TP to inactive regions
+* Destination source can be set from a notecard or from a web server
+* Immediate TP or map (change USE_MAP in config)
+* Different colors for current region (green) or offline regions (red), customizable
+* Optional background texture
+* Can be formatted with titles (text without url), spacer (|) and column jump (-)
+
+## Setup
 
 The destination list can be set by 3 ways
  - from an external website: put the URL in prim description
  - from a specific notecard: put "card://CardName" in the description
  - fallback if none of the two first method: read the first notecard found.
 
-In previous versions, the destination list used 5 values. We accept this old // format for backward compatibility but we recommand the simplified format:
-     Displayed Name|your.grid:port
+In previous versions, the destination list used 5 values. We accept this old
+format for backward compatibility but we recommend the simplified format:
+       Displayed Name|your.grid:port
 or   Displayed Name|your.grid:port:Region Name
 or   Displayed Name|your.grid:port:Region Name|x,y,z
 
 Empty lines are ignored
-Lines commented with "//" are sent as message to the owner and not processed
+Lines commented with "//" are sent as message to the owner during initializaton
 Lines containing only a string (and no url) are drawn as simple text
 Lines containing only a separator ("|") are drawn as an empty line (spacer)
+Lines beginning wish "#" are ignored
 
-Required OSSL Functions:
-   osGetGridGatekeeperURI
-   osGetNotecard
-   osTeleportAgent
-   osSetDynamicTextureDataBlendFace and related functions
-       (osDrawFilledRectangle, osDrawRectangle, osDrawText,
-       osGetDrawStringSize, osMovePen, osSetFontName, osSetFontSize,
-       osSetPenColor, osSetPenSize)
+Although commenting lines is useful to disable them temporarily (#) or display
+help messages (//), it slows down the initialization, so it is better to avoid
+it as much as possible.
+
+## Required OSSL Functions:
+
+* osGetGridGatekeeperURI
+* osGetNotecard
+* osTeleportAgent
+* osSetDynamicTextureDataBlendFace and related
+   (osDrawFilledRectangle, osDrawRectangle, osDrawText,
+   osGetDrawStringSize, osMovePen, osSetFontName, osSetFontSize,
+   osSetPenColor, osSetPenSize)
