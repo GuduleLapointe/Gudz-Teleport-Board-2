@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.1
+// Version 2.0.2
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -450,7 +450,7 @@ integer action(integer index, key who) {
         llInstantMessage(who, "Cannot teleport, " + destName + " status is " + destStatus);
         return FALSE; // Incompatible region
     }
-    llWhisper(0, "You have selected "+ destName + " (" + destURI + ") " + destLanding);
+    llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + destLanding);
     // Préparer les globales avant de sauter
     if (USE_MAP) {
         llMapDestination (destURI, destLanding, ZERO_VECTOR);
@@ -459,7 +459,9 @@ integer action(integer index, key who) {
 
     teleportAgent = who;
     teleportURI = destURI;
-    teleportLanding = destLanding;
+    if(destLanding == "" || destLanding == "0,0,0")
+    teleportLanding = "128,128,25";
+    else teleportLanding = destLanding;
 
 
     debug("teleporting to " + teleportURI);
