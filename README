@@ -1,0 +1,40 @@
+Gudule's Teleport Board 2
+Version 2.0.0
+Get the latest version on Github:
+https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
+
+(c) Gudule Lapointe 2016-2018
+This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
+of Jeff Kelley' 2010 HGBoard script. Very few of the original code was kept
+(except mainly the drawing engine).
+
+This script is licensed under Creative Commons BY-NC-SA
+See <http://creativecommons.org/licenses/by-nc-sa/3.0/>
+You may not use this work for commercial purposes.
+You must attribute the work to the authors, Jeff Kelley and Gudule Lapointe
+You may distribute, alter, transform, or build upon this work
+as long as you do not delete the name of the original authors.
+
+The destination list can be set by 3 ways
+ - from an external website: put the URL in prim description
+ - from a specific notecard: put "card://CardName" in the description
+ - fallback if none of the two first method: read the first notecard found.
+
+In previous versions, the destination list used 5 values. We accept this old // format for backward compatibility but we recommand the simplified format:
+     Displayed Name|your.grid:port
+or   Displayed Name|your.grid:port:Region Name
+or   Displayed Name|your.grid:port:Region Name|x,y,z
+
+Empty lines are ignored
+Lines commented with "//" are sent as message to the owner and not processed
+Lines containing only a string (and no url) are drawn as simple text
+Lines containing only a separator ("|") are drawn as an empty line (spacer)
+
+Required OSSL Functions:
+   osGetGridGatekeeperURI
+   osGetNotecard
+   osTeleportAgent
+   osSetDynamicTextureDataBlendFace and related functions
+       (osDrawFilledRectangle, osDrawRectangle, osDrawText,
+       osGetDrawStringSize, osMovePen, osSetFontName, osSetFontSize,
+       osSetPenColor, osSetPenSize)

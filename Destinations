@@ -1,0 +1,28 @@
+// Example destinations notecard
+
+// To use as a destination list, empty the description of the prim and name the notecard "Destinations"
+// To get the list from the web put the URL in the description of the prim
+// The notecard will be ignored if there is an URL
+// To use a specific Notecard, put "card://MyNoteCard" in the prim description
+
+// Enter each destination in the form :
+// Destination name | grid.address:port:Region Name | x,y,z (optional landing point)
+
+// Region name and landing point are optional
+// Lines with text and no url are treated as simple text
+// Lines with "-" but no values are treated as column jump
+// Lines with "|" but no values are treated as separators
+// Empty lines are ignored
+
+Speculoos|speculoos.world:8002
+Grand Place|speculoos.world:8002:Grand Place|255,255,22
+Kimbé Rèd|kimbe.red:9700:Kimbe Red
+|
+OSGrid|hg.osgrid.org:80:Lbsa Plaza
+Littlefield|lfgrid.com:8002
+Lost Paradise|ccdbbs.com:8002
+Metropolis|hypergrid.org:8002
+FrancoGrid|hg.francogrid.org:80
+Refuge Grid|refugegrid.com:8002
+Craft|craft-world.org:8002
+Lost World|lostworld-os.com:8002
