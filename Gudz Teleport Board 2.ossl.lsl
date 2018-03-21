@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.2
+// Version 2.0.4
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -515,7 +515,7 @@ default
         } else {
             debug("Lost query (should not happen)" + query_id + " status " + data);
         }
-        llSetTimerEvent(10); //
+        llSetTimerEvent(15); //
     }
 
     timer()
@@ -562,6 +562,10 @@ state ready {
     {
         llResetScript();
     }
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
 }
 
 state teleporting {
@@ -593,5 +597,8 @@ state teleporting {
         llInstantMessage(teleportAgent, "Destination is offline");
         state ready;
     }
-
+    on_rez(integer start_param)
+    {
+        llResetScript();
+    }
 }
