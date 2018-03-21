@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.4
+// Version 2.0.5
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -73,6 +73,7 @@ integer CELL_BORDER_SIZE  = 5;
 
 integer SHOW_RATING = FALSE; // Wrong results for HG links, good in local grid
 integer REFRESH_DELAY = 3600;
+integer BACKGROUND_CHECK = TRUE; // run status checks after rendering the board
 
 integer DEBUG = FALSE;
 string CONFIG_FILE = "Configuration";
@@ -86,6 +87,8 @@ string localRegionURI;
 string source;
 list destinations;
 integer DESTCOLS=6;
+integer COL_STATUS = 4;
+integer COL_RATING = 5;
 key httpNotecardId;
 key httpDestCheckId;
 key httpDestRatingId;
@@ -164,7 +167,6 @@ parseDestinations(string data) {
     list lines = llParseString2List (data,["\n"],[]);
     integer count = llGetListLength(lines);
     statusUpdate(count + " lines to process");
-    //integer length = llGetListLength (lines);
     integer i; for (i=0;i<llGetListLength (lines);i++)
     {
         statusUpdate("Processing line " + (i+1) + " of " + count);
@@ -221,11 +223,20 @@ addDestination(string name, string uri, string landing) {
     if(uri != "" && llListFindList(destinations, uri) >=0 ) return;
     uri=strReplace(uri, "http://", "");
     // name, uri, landingPoint, gridname, status, rating
-    destinations += [name, uri, landing, "", "", ""];
-    checkDestination(uri);
+    destinations += [name, uri, landing, "", "up", ""];
+    if(! BACKGROUND_CHECK) checkDestination(uri);
+}
+checkDestinationByIndex(integer index)
+{
+    if(index >= llGetListLength(destinations)) return;
+    string uri = llList2String(destinations, index + 1);
+    debug("checking " + index + " " + uri);
+    if(uri =="") checkDestinationByIndex(index + DESTCOLS);
+    else checkDestination(uri);
 }
 checkDestination(string uri) {
     if(uri == "") return;
+    statusUpdate("Checking " + uri + " status");
     //debug("checking " + uri);
     integer index = llListFindList(destinations, uri) - 1;
     httpDestCheckId = llRequestSimulatorData(uri, DATA_SIM_STATUS);
@@ -236,6 +247,32 @@ checkDestination(string uri) {
         destinations = llListReplaceList(destinations, [ httpDestRatingId ] , index + 5, index + 5);
     }
 }
+
+string getStatus(string uri)
+{
+    integer index = llListFindList(destinations, uri);
+    if(index == -1) return "not found";
+    return llList2String(destinations, index + COL_STATUS);
+}
+string getRating(string uri)
+{
+    integer index = llListFindList(destinations, uri);
+    if(index == -1) return "";
+    return llList2String(destinations, index + COL_RATING);
+}
+setStatus(string uri, string status)
+{
+    if(status == getStatus(uri)) return; // no change
+    debug("changing " + uri + " status from " + getStatus(uri) + " to " + status);
+    integer index = llListFindList(destinations, uri);
+    debug("found index " + index);
+    if(index == -1) return;
+    debug("replacing");
+    destinations = llListReplaceList(destinations, [ status ], index + COL_STATUS, index + COL_STATUS);
+    debug("status is now " + getStatus(uri));
+    drawTable();
+}
+
 getSource()
 {
     if(source == "") source = llGetObjectDesc();
@@ -447,8 +484,7 @@ integer action(integer index, key who) {
     if (destName == "" || destURI == "") return FALSE; // Empty cell
     if (destStatus != "up")
     {
-        llInstantMessage(who, "Cannot teleport, " + destName + " status is " + destStatus);
-        return FALSE; // Incompatible region
+        llInstantMessage(who, "Last time I checked, " + destName + " was " + destStatus + " but I will try");
     }
     llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + destLanding);
     // Préparer les globales avant de sauter
@@ -502,6 +538,7 @@ default
         if (id == httpNotecardId)
         parseDestinations (body);
         statusUpdate("Data collected, rendering board");
+        if(BACKGROUND_CHECK) state ready;
     }
 
     dataserver(key query_id, string data)
@@ -510,7 +547,7 @@ default
         if(destCheckIndex >= 0) {
             integer column = destCheckIndex % DESTCOLS;
             destinations = llListReplaceList(destinations, [ data ], destCheckIndex, destCheckIndex);
-            string destinationName = llList2String(destinations, destCheckIndex - column);
+            //string destinationName = llList2String(destinations, destCheckIndex - column);
             //debug (destinationName + " is " + (string)data);
         } else {
             debug("Lost query (should not happen)" + query_id + " status " + data);
@@ -539,6 +576,7 @@ state ready {
         teleportURI = "";
         teleportLanding = <0,0,0>;
         llSetTimerEvent(REFRESH_DELAY * (0.9 + llFrand(0.2)));
+        if(BACKGROUND_CHECK) checkDestinationByIndex(0);
     }
 
     touch_start (integer n) {
@@ -552,6 +590,26 @@ state ready {
         if (activeSide != ALL_SIDES && llListFindList(ACTIVE_SIDES, (string)face) == -1) return;
 
         integer ok = action (getCellClicked(point), whoClick);
+    }
+
+    dataserver(key query_id, string data)
+    {
+        integer destCheckIndex = llListFindList(destinations, query_id);
+        if(destCheckIndex >= 0) {
+            destinations = llListReplaceList(destinations, [ data ], destCheckIndex, destCheckIndex);
+            //string destinationName = llList2String(destinations, destCheckIndex - column);
+            //debug (destinationName + " is " + (string)data);
+        } else {
+            debug("Lost query (should not happen)" + query_id + " status " + data);
+        }
+        integer column = destCheckIndex % DESTCOLS;
+        integer nextIndex = (destCheckIndex - column) + DESTCOLS;
+        if(nextIndex >= llGetListLength(destinations)) {
+            statusUpdate("");
+            drawTable();
+        }
+        else checkDestinationByIndex(nextIndex);
+        //llSetTimerEvent(15); //
     }
 
     changed(integer change) {
@@ -585,16 +643,18 @@ state teleporting {
                 debug("OK, teleporting " + teleportAgent + " to " + teleportURI);
                 llInstantMessage(teleportAgent, "Fasten your seat belt, we move!!!");
                 osTeleportAgent(teleportAgent, teleportURI, teleportLanding, ZERO_VECTOR);
-                state ready;
             } else {
                 llInstantMessage(teleportAgent, "Sorry, flight is canceled, region status is " + data);
-                state ready;
             }
+            debug("saving status " + data + " for " + teleportURI);
+            setStatus(teleportURI, data);
+            state ready;
         }
     }
 
     timer() {
         llInstantMessage(teleportAgent, "Destination is offline");
+        setStatus(teleportURI, "timeout");
         state ready;
     }
     on_rez(integer start_param)
