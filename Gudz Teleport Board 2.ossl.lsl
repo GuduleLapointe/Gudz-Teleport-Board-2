@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.5
+// Version 2.0.6
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -236,9 +236,11 @@ checkDestinationByIndex(integer index)
 }
 checkDestination(string uri) {
     if(uri == "") return;
-    statusUpdate("Checking " + uri + " status");
-    //debug("checking " + uri);
     integer index = llListFindList(destinations, uri) - 1;
+    uri  = strReplace(uri, "http://", "");
+    uri  = strReplace("http://" + uri, localGatekeeperURI + ":", "");
+    uri  = strReplace(uri, "http://", "");
+    statusUpdate("Checking " + uri);
     httpDestCheckId = llRequestSimulatorData(uri, DATA_SIM_STATUS);
     destinations = llListReplaceList(destinations, [ httpDestCheckId ] , index + 4, index + 4);
     if(SHOW_RATING)
