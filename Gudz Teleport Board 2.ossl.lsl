@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.7
+// Version 2.0.8
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -17,6 +17,7 @@
 
 // The destination list can be set by 3 ways
 //  - from an external website: put the URL in prim description
+//    (only the first 2048 bytes will be loaded)
 //  - from a specific notecard: put "card://CardName" in the description
 //  - fallback if none of the two first method: read the first notecard found.
 //
@@ -578,7 +579,11 @@ state ready {
         teleportURI = "";
         teleportLanding = <0,0,0>;
         llSetTimerEvent(REFRESH_DELAY * (0.9 + llFrand(0.2)));
-        if(BACKGROUND_CHECK) checkDestinationByIndex(0);
+        if(BACKGROUND_CHECK)
+        {
+            checkDestinationByIndex(0);
+            llSetTimerEvent(15); //
+        }
     }
 
     touch_start (integer n) {
@@ -610,8 +615,11 @@ state ready {
             statusUpdate("");
             drawTable();
         }
-        else checkDestinationByIndex(nextIndex);
-        //llSetTimerEvent(15); //
+        else
+        {
+            checkDestinationByIndex(nextIndex);
+            llSetTimerEvent(15); //
+        }
     }
 
     changed(integer change) {
@@ -620,7 +628,10 @@ state ready {
     }
     timer()
     {
-        llResetScript();
+        llSetTimerEvent(0);
+        statusUpdate("");
+        drawTable();
+        //llResetScript();
     }
     on_rez(integer start_param)
     {

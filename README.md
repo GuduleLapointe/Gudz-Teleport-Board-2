@@ -19,6 +19,7 @@ Get the latest version on Github:
 
 The destination list can be set by 3 ways
  - from an external website: put the URL in prim description
+   (only the first 2048 bytes will be loaded)
  - from a specific notecard: put "card://CardName" in the description
  - fallback if none of the two first method: read the first notecard found.
 
