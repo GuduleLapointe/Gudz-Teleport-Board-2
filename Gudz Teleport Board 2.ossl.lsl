@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.6
+// Version 2.0.7
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -436,7 +436,7 @@ drawCell (integer x, integer y) {
     cellBackground = CELL_DISABLED;
 
     // Adjust text to fit cell
-    cellName = trimCell(cellName, FONT_NAME, fontSize, cellWidth - 2*CELL_BORDER_SIZE);
+    cellName = trimCell(cellName, FONT_NAME, fontSize, cellWidth - 2*paddingLeft);
 
     // Fill background
     if(cellBackground != "transparent") {
