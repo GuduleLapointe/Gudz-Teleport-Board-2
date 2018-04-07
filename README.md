@@ -7,11 +7,13 @@ Get the latest version on Github:
 
 * Single or Multi-columns teleport buttons
 * Destinations are checked at start and every hour to avoid TP to inactive regions
+* Local destinations can be written as HG links and are automatically converted to local links for teleport, so the same board works inside and outside your grid
 * Destination source can be set from a notecard or from a web server
 * Immediate TP or map (change USE_MAP in config)
 * Different colors for current region (green) or offline regions (red), customizable
 * Optional background texture
 * Can be formatted with titles (text without url), spacer (|) and column jump (-)
+* Configuration in a separate notecard to allow easy upgrades
 
 ## Setup
 
