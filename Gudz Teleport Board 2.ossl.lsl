@@ -1,8 +1,8 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.2.0";
+string SCRIPT_VERSION = "2.2.1";
 
 // Get the latest version from Github:
-//  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
+//  https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 //
 // (c) Gudule Lapointe 2016-2018
 // This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
