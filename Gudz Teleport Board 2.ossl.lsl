@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.0.9";
+string SCRIPT_VERSION = "2.0.10";
 
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
@@ -351,10 +351,7 @@ drawTable() {
     drawList = osSetFontSize (drawList, fontSize);
     drawList = osSetFontName (drawList, FONT_NAME);
 
-    if(BACKGROUND_TEXTURE == "transparent") {
-        llSetTexture(TEXTURE_BLANK, activeSide);
-        llSetTexture(TEXTURE_TRANSPARENT, activeSide);
-    } else if (BACKGROUND_COLOR != "transparent"){
+    if(BACKGROUND_TEXTURE != "transparent") {
         drawList = osMovePen     (drawList, 0, 0);
         drawList = osSetPenColor (drawList, BACKGROUND_COLOR);
         drawList = osDrawFilledRectangle (drawList, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -397,9 +394,9 @@ displayEnd() {
     +",bgcolor:"+(string)renderColor;
 
     if(BACKGROUND_TEXTURE == TEXTURE_TRANSPARENT)
-    osSetDynamicTextureData ( "", "vector", drawList, drawParameters, 0);
+    dynamicTexture = osSetDynamicTextureData ( "", "vector", drawList, drawParameters, 0);
     else
-    osSetDynamicTextureDataBlendFace ( "", "vector", drawList, drawParameters, TRUE, 1, 0, 255, activeSide);
+    dynamicTexture = osSetDynamicTextureDataBlendFace ( "", "vector", drawList, drawParameters, TRUE, 1, 0, 255, activeSide);
 
     integer i;
     for (i=1; i<llGetListLength(ACTIVE_SIDES); i++)
