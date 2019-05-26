@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.1.0";
+string SCRIPT_VERSION = "2.2.0";
 
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
@@ -105,6 +105,7 @@ string teleportURI;
 vector teleportLanding;
 string currentStatus;
 string sourceType;
+float touchStarted;
 
 string strReplace(string str, string search, string replace) {
     return llDumpList2String(llParseStringKeepNulls((str),[search],[]),replace);
@@ -627,7 +628,12 @@ state ready {
         }
     }
 
-    touch_start (integer n) {
+    touch_start(integer num_detected)
+    {
+        touchStarted=llGetTime();
+    }
+
+    touch_end(integer num){
         key whoClick = llDetectedKey(0);
         vector point = llDetectedTouchST(0);
         integer face = llDetectedTouchFace(0);
@@ -636,6 +642,15 @@ state ready {
         if (link != llGetLinkNumber()) return;
         if (point == TOUCH_INVALID_TEXCOORD) return;
         if (activeSide != ALL_SIDES && llListFindList(ACTIVE_SIDES, (string)face) == -1) return;
+
+        if (whoClick == llGetOwner())
+        {
+            float touchElapsed = llGetTime() - touchStarted;
+            if(touchElapsed > 2 && sourceType=="url") {
+                llOwnerSay("/me reload forced by long click");
+                state default;
+            }
+        }
 
         integer ok = action (getCellClicked(point), whoClick);
     }
@@ -677,7 +692,7 @@ state ready {
             llSetTimerEvent(REFRESH_DELAY);
         } else if(currentStatus=="ready" && sourceType == "url")
         {
-            debug("refresh delay ended, reloading URL");
+            debug("refresh delay ended, reloading URLs");
             // getSource();
             llResetScript();
         } else {
