@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.0.10";
+string SCRIPT_VERSION = "2.1.0";
 
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
@@ -75,7 +75,7 @@ integer CELL_BORDER_SIZE  = 5;
 
 integer SHOW_RATING = FALSE; // Wrong results for HG links, good in local grid
 integer REFRESH_DELAY = 3600;
-integer BACKGROUND_CHECK = TRUE; // run status checks after rendering the board
+integer DELAYED_CHECK = TRUE; // run status checks after rendering the board. Slower, but better for long lists
 
 integer DEBUG = FALSE;
 string CONFIG_FILE = "Configuration";
@@ -103,12 +103,15 @@ integer paddingLeft;
 key teleportAgent;
 string teleportURI;
 vector teleportLanding;
+string currentStatus;
+string sourceType;
 
 string strReplace(string str, string search, string replace) {
     return llDumpList2String(llParseStringKeepNulls((str),[search],[]),replace);
 }
 
 getConfig() {
+    currentStatus = "getConfig";
     if(llGetInventoryType(CONFIG_FILE) != INVENTORY_NOTECARD) return;
     debug("Reading config from " + CONFIG_FILE);
 
@@ -170,14 +173,23 @@ getConfig() {
     //debug("active sides " + llGetListLength(ACTIVE_SIDES) + " " + llDumpList2String(ACTIVE_SIDES, ":"));
 }
 readDestFromURL(string url) {
+    currentStatus="readDestFromURL";
+    debug(currentStatus);
+    sourceType = "url";
     debug("Reading destinations from url " + url);
     httpNotecardId = llHTTPRequest(url,
         [ HTTP_METHOD,  "GET", HTTP_MIMETYPE,"text/plain;charset=utf-8" ], "");
 }
 readDestFromLSLServer(key uuid, string cardname) {
+    currentStatus="readDestFromLSLServer";
+    debug(currentStatus);
+    sourceType = "lslserver";
     // Not implemented
 }
 readDestFromNotecard(string notecard) {
+    currentStatus="readDestFromNotecard";
+    debug(currentStatus);
+    sourceType = "notecard";
     debug("Reading destination from notecard " + notecard);
     parseDestinations(osGetNotecard(notecard));
 }
@@ -242,7 +254,7 @@ addDestination(string name, string uri, string landing) {
     uri=strReplace(uri, "http://", "");
     // name, uri, landingPoint, gridname, status, rating
     destinations += [name, uri, landing, "", "up", ""];
-    if(! BACKGROUND_CHECK) checkDestination(uri);
+    if(! DELAYED_CHECK) checkDestination(uri);
 }
 checkDestinationByIndex(integer index)
 {
@@ -295,6 +307,8 @@ setStatus(string uri, string status)
 
 getSource()
 {
+    currentStatus = "getSource";
+    debug(currentStatus);
     if(source == "") source = llGetObjectDesc();
     if(source=="") {
         if(llGetInventoryName(INVENTORY_NOTECARD, 0) != CONFIG_FILE)
@@ -531,6 +545,7 @@ default
 {
     state_entry()
     {
+        debug("restarting");
         statusUpdate("Initializing");
         getConfig();
         activeSide = llList2Integer(ACTIVE_SIDES, 0);
@@ -561,7 +576,7 @@ default
         if (id == httpNotecardId)
         parseDestinations (body);
         statusUpdate("Data collected, rendering board");
-        if(BACKGROUND_CHECK) state ready;
+        if(DELAYED_CHECK) state ready;
     }
 
     dataserver(key query_id, string data)
@@ -598,11 +613,17 @@ state ready {
         teleportAgent = NULL_KEY;
         teleportURI = "";
         teleportLanding = <0,0,0>;
-        llSetTimerEvent(REFRESH_DELAY * (0.9 + llFrand(0.2)));
-        if(BACKGROUND_CHECK)
+        if(DELAYED_CHECK)
         {
+            currentStatus="checking status";
+            debug("setting timer to 15 for request timeout");
             checkDestinationByIndex(0);
             llSetTimerEvent(15); //
+        } else {
+            currentStatus="ready";
+            debug("setting timer for next reload 10");
+            llSetTimerEvent(REFRESH_DELAY * (0.9 + llFrand(0.2)));
+            // llSetTimerEvent(REFRESH_DELAY);
         }
     }
 
@@ -643,14 +664,27 @@ state ready {
     }
 
     changed(integer change) {
-        if (change & CHANGED_REGION) llResetScript();
         if (change & CHANGED_INVENTORY) llResetScript();
+        if (change & CHANGED_REGION) llResetScript();
     }
     timer()
     {
-        llSetTimerEvent(0);
-        statusUpdate("");
-        drawTable();
+        if(currentStatus=="checking status") {
+            debug("checking timed out, rendering");
+            statusUpdate("");
+            drawTable();
+            currentStatus="rendered";
+            llSetTimerEvent(REFRESH_DELAY);
+        } else if(currentStatus=="ready" && sourceType == "url")
+        {
+            debug("refresh delay ended, reloading URL");
+            // getSource();
+            llResetScript();
+        } else {
+            debug("refresh delay ended, status=" + currentStatus + ", sourceType=" + sourceType);
+            llSetTimerEvent(REFRESH_DELAY);
+        }
+        debug("reset from state ready");
         //llResetScript();
     }
     on_rez(integer start_param)
@@ -692,6 +726,7 @@ state teleporting {
     }
     on_rez(integer start_param)
     {
+        debug("reset from state teleporting");
         llResetScript();
     }
 }
