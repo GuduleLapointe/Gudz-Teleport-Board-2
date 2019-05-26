@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-// Version 2.0.9
+// Version 2.0.8
 // Get the latest version from Github:
 //  https://github.com/GuduleLapointe/Gudz-Teleport-Board-2
 //
@@ -121,13 +121,10 @@ getConfig() {
         string val = llStringTrim(llList2String(parse, 1), STRING_TRIM);
         if (var == "USE_MAP") USE_MAP = (integer)val;
         else if (var == "ACTIVE_SIDES") {
-            if(val != "")
-            {
-                val=strReplace(val, "[", "");
-                val=strReplace(val, "]", "");
-                val=strReplace(val, " ", "");
-                ACTIVE_SIDES = llParseString2List(val, [","," "], "");
-            }
+            val=strReplace(val, "[", "");
+            val=strReplace(val, "]", "");
+            val=strReplace(val, " ", "");
+            ACTIVE_SIDES = llParseString2List(val, [","," "], "");
         }
         else if (var == "TEXTURE_WIDTH") TEXTURE_WIDTH = (integer)val;
         else if (var == "TEXTURE_HEIGHT") TEXTURE_HEIGHT = (integer)val;
@@ -140,13 +137,7 @@ getConfig() {
         else if (var == "PADDING_LEFT") PADDING_LEFT = (float)val;
         else if (var == "PADDING_TOP") PADDING_TOP = (float)val;
         else if (var == "BACKGROUND_COLOR") BACKGROUND_COLOR = (string)val;
-        else if (var == "BACKGROUND_TEXTURE") {
-            if(val == "transparent") {
-                BACKGROUND_TEXTURE = TEXTURE_TRANSPARENT;
-            }
-            else
-            BACKGROUND_TEXTURE = (key)val;
-            }
+        else if (var == "BACKGROUND_TEXTURE") BACKGROUND_TEXTURE = (key)val;
         else if (var == "CELL_ACTIVE") CELL_ACTIVE = (string)val;
         else if (var == "CELL_DISABLED") CELL_DISABLED = (string)val;
         else if (var == "CELL_THIS_REGION") CELL_THIS_REGION = (string)val;
@@ -158,12 +149,6 @@ getConfig() {
         else if (var == "REFRESH_DELAY") REFRESH_DELAY = (integer)val;
         else if (var == "CELL_BORDER_SIZE") CELL_BORDER_SIZE = (integer)val;
         else debug("Configuration ignored: " + line);
-    }
-    if(BACKGROUND_COLOR == "transparent"
-    || BACKGROUND_TEXTURE == "transparent"
-    || BACKGROUND_TEXTURE == TEXTURE_TRANSPARENT) {
-        BACKGROUND_COLOR = "transparent";
-        BACKGROUND_TEXTURE = TEXTURE_TRANSPARENT;
     }
     //debug("active sides " + llGetListLength(ACTIVE_SIDES) + " " + llDumpList2String(ACTIVE_SIDES, ":"));
 }
@@ -349,10 +334,7 @@ drawTable() {
     drawList = osSetFontSize (drawList, fontSize);
     drawList = osSetFontName (drawList, FONT_NAME);
 
-    if(BACKGROUND_COLOR == "transparent") {
-        llSetTexture(TEXTURE_BLANK, activeSide);
-        llSetTexture(TEXTURE_TRANSPARENT, activeSide);
-    } else {
+    if(BACKGROUND_COLOR != "transparent") {
         drawList = osMovePen     (drawList, 0, 0);
         drawList = osSetPenColor (drawList, BACKGROUND_COLOR);
         drawList = osDrawFilledRectangle (drawList, TEXTURE_WIDTH, TEXTURE_HEIGHT);
@@ -376,31 +358,25 @@ displayBegin() {
 
 displayEnd() {
     integer alpha = 255;
-    string renderTexture = BACKGROUND_TEXTURE;
-    string renderColor = BACKGROUND_COLOR;
+    if(BACKGROUND_COLOR == "transparent") alpha = 0;
     string dynamicTexture;
-
-    if(BACKGROUND_TEXTURE == NULL_KEY || destinations == [ "Initializing" ])
-    renderTexture = INITIALIZING_TEXTURE;
-
-    if(BACKGROUND_COLOR == "transparent" || renderTexture == TEXTURE_TRANSPARENT) {
-        alpha = 0;
-        renderColor = "transparent";
-    };
-    llSetTexture(renderTexture, activeSide);
-
-    string drawParameters = "width:"+(string)(TEXTURE_WIDTH)
-    +",height:"+(string)TEXTURE_HEIGHT
-    +",alpha:"+(string)alpha
-    +",bgcolor:"+(string)renderColor;
-
-    if(BACKGROUND_COLOR == "transparent") {
-        osSetDynamicTextureData    ( "", "vector", drawList, drawParameters, 0);
-    }
-    else {
-        osSetDynamicTextureDataBlendFace ( "", "vector", drawList, drawParameters, TRUE, 1, 0, 255, activeSide
-        );
-
+    if(BACKGROUND_TEXTURE == NULL_KEY || destinations == [ "Initializing" ]) {
+        dynamicTexture = osSetDynamicTextureDataBlendFace ( "", "vector", drawList,
+            "width:"+(string)(TEXTURE_WIDTH)
+            +",height:"+(string)TEXTURE_HEIGHT
+            +",alpha:"+(string)alpha
+            +",bgcolor:"+(string)BACKGROUND_COLOR
+            , FALSE, 1, 0, 255, activeSide
+            );
+    } else {
+        llSetTexture(BACKGROUND_TEXTURE, activeSide);
+        dynamicTexture = osSetDynamicTextureDataBlendFace ( "", "vector", drawList,
+            "width:"+(string)(TEXTURE_WIDTH)
+            +",height:"+(string)TEXTURE_HEIGHT
+            +",alpha:"+(string)alpha
+            +",bgcolor:"+(string)BACKGROUND_COLOR
+            , TRUE, 1, 0, 255, activeSide
+            );
     }
 
     integer i;
@@ -539,10 +515,9 @@ default
         statusUpdate("Initializing");
         getConfig();
         activeSide = llList2Integer(ACTIVE_SIDES, 0);
-        llSetTexture(BACKGROUND_TEXTURE, activeSide);
-        // llSetTexture(INITIALIZING_TEXTURE, activeSide);
-        // destinations = ["Initializing"];
-        // drawTable();
+        llSetTexture(INITIALIZING_TEXTURE, activeSide);
+        destinations = ["Initializing"];
+        drawTable();
         destinations = [];
         localGatekeeperURI = strReplace(osGetGridGatekeeperURI(), "http://", "");
         localRegionURI = localGatekeeperURI + ":" + llGetRegionName();
