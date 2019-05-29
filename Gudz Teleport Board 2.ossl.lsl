@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.2.1";
+string SCRIPT_VERSION = "2.2.2";
 
 // Get the latest version from Github:
 //  https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
@@ -558,6 +558,8 @@ default
         localGatekeeperURI = strReplace(osGetGridGatekeeperURI(), "http://", "");
         localRegionURI = localGatekeeperURI + ":" + llGetRegionName();
         getSource();
+        if(sourceType == "notecard")
+        state ready;
 
         //llOwnerSay("Requesting " + Region +  " status");
         //key requestId = llRequestSimulatorData(Region, DATA_SIM_STATUS);
