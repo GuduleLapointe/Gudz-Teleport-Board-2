@@ -1,5 +1,5 @@
 // Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.4";
+string SCRIPT_VERSION = "2.4.1";
 
 // Get the latest version from Github:
 //  https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
