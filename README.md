@@ -1,7 +1,11 @@
 # Gudule's Teleport Board 2
 
-Get the latest version on Github:
-    https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
+* Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
+*           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
+* Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
+* Website:  https://speculoos.world/lab
+* Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
+*           Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
 
 ## Features:
 

@@ -1,20 +1,23 @@
-// Gudule's Teleport Board 2
-string SCRIPT_VERSION = "2.4.1";
-
-// Get the latest version from Github:
-//  https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
-//
-// (c) Gudule Lapointe 2016-2018
-// This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
-// of Jeff Kelley' 2010 HGBoard script. Very few of the original code was kept
-// (except mainly the drawing engine).
-//
-// This script is licensed under Creative Commons BY-NC-SA
-// See <http://creativecommons.org/licenses/by-nc-sa/3.0/>
-// You may not use this work for commercial purposes.
-// You must attribute the work to the authors, Jeff Kelley and Gudule Lapointe
-// You may distribute, alter, transform, or build upon this work
-// as long as you do not delete the name of the original authors.
+/*
+ * Gudz Teleport Board 2
+ *
+ * Version:  2.4.2
+ * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
+ *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
+ * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
+ * Website:  https://speculoos.world/lab
+ * Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
+ *           Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
+ *
+ * This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
+ * of Jeff Kelley' 2010 HGBoard script. Very few of Jeff's original code was
+ * kept (mainly the drawing engine).
+ *
+ * Contributing:
+ * If you improve this software, please give back to the community, by
+ * submitting your changes on the git repository or sending them to the authors.
+ * That's one of the meanings of Affero GPL!
+ */
 
 // The destination list can be set by 3 ways
 //  - from an external website: put the URL in prim description
@@ -32,7 +35,7 @@ string SCRIPT_VERSION = "2.4.1";
 // Lines containing only a string (and no url) are drawn as simple text
 // Lines containing only a separator ("|") are drawn as an empty line (spacer)
 
-//OSSL Functions:
+// OSSL Functions:
 //    osGetGridGatekeeperURI
 //    osGetNotecard
 //    osTeleportAgent
@@ -94,7 +97,7 @@ integer DESTCOLS=6;
 integer COL_STATUS = 4;
 integer COL_RATING = 5;
 key httpNotecardId;
-key httpDestCheckId;
+key teleportCheckId;
 key httpDestRatingId;
 integer firstRun = TRUE;
 integer cellsFound;
@@ -111,6 +114,12 @@ float touchStarted;
 
 string strReplace(string str, string search, string replace) {
     return llDumpList2String(llParseStringKeepNulls((str),[search],[]),replace);
+}
+
+integer boolean(string val)
+{
+    if(llToUpper(val) == "TRUE" | (integer)val == TRUE) return TRUE;
+    else return FALSE;
 }
 
 getConfig() {
@@ -161,7 +170,7 @@ getConfig() {
         else if (var == "CELL_TITLE_FONT") CELL_TITLE_FONT = (string)val;
         else if (var == "CELL_BORDER_COLOR") CELL_BORDER_COLOR = (string)val;
         else if (var == "CELL_BORDER_SIZE") CELL_BORDER_SIZE = (integer)val;
-        else if (var == "SHOW_RATING") SHOW_RATING = (integer)val;
+        else if (var == "SHOW_RATING") SHOW_RATING = boolean(val);
         else if (var == "REFRESH_DELAY") REFRESH_DELAY = (integer)val;
         else if (var == "CELL_BORDER_SIZE") CELL_BORDER_SIZE = (integer)val;
         else debug("Configuration ignored: " + line);
@@ -206,7 +215,7 @@ parseDestinations(string data) {
         parseDestination (llList2String(lines,i));
     }
 }
-parseDestination (string line) {
+parseDestination(string line) {
     if(llGetListLength(destinations) / DESTCOLS >= COLUMNS * ROWS) return;
     if (llStringTrim(line, STRING_TRIM) == "") return; // Ignore empty lines
     if (llGetSubString (line,0,0) == "#") return;  // Comment, ignore
@@ -256,31 +265,37 @@ addDestination(string name, string uri, string landing) {
     if(uri != "" && llListFindList(destinations, uri) >=0 ) return;
     uri=strReplace(uri, "http://", "");
     // name, uri, landingPoint, gridname, status, rating
+    debug("adding " + llGetListLength(destinations) + ": " + name);
     destinations += [name, uri, landing, "", "up", ""];
     if(! DELAYED_CHECK) checkDestination(uri);
 }
 checkDestinationByIndex(integer index)
 {
-    if(index >= llGetListLength(destinations)) return;
     string uri = llList2String(destinations, index + 1);
+    if(index >= llGetListLength(destinations)) return;
     // debug("checking " + index + " " + uri);
     if(uri =="") checkDestinationByIndex(index + DESTCOLS);
     else checkDestination(uri);
 }
 checkDestination(string uri) {
-    if(uri == "") return;
+    if(uri == "") {
+        debug("uri " + uri + " empty");
+        return;
+    }
     integer index = llListFindList(destinations, uri) - 1;
+    debug("checking " + index + " " + uri);
     uri  = strReplace(uri, "http://", "");
     uri  = strReplace("http://" + uri, localGatekeeperURI + ":", "");
     uri  = strReplace(uri, "http://", "");
     statusUpdate("Checking " + uri);
-    httpDestCheckId = llRequestSimulatorData(uri, DATA_SIM_STATUS);
+    key httpDestCheckId = llRequestSimulatorData(uri, DATA_SIM_STATUS);
     destinations = llListReplaceList(destinations, [ httpDestCheckId ] , index + 4, index + 4);
     if(SHOW_RATING)
     {
         httpDestRatingId = llRequestSimulatorData(uri, DATA_SIM_RATING);
         destinations = llListReplaceList(destinations, [ httpDestRatingId ] , index + 5, index + 5);
     }
+    // else debug("SHOW_RATING is set to " + SHOW_RATING);
 }
 
 string getStatus(string uri)
@@ -347,6 +362,7 @@ integer isUUID (string s) {
 
 statusUpdate(string status) {
     llSetText(status, <1,1,1>, 1.0);
+    // if(DEBUG) debug(status);
 }
 
 debug(string msg)
@@ -411,7 +427,7 @@ displayEnd() {
     +",bgcolor:"+(string)renderColor;
 
     if(BACKGROUND_TEXTURE == TEXTURE_TRANSPARENT)
-    dynamicTexture = osSetDynamicTextureData ( "", "vector", drawList, drawParameters, 0);
+    dynamicTexture = osSetDynamicTextureDataFace ( "", "vector", drawList, drawParameters, 0, activeSide);
     else
     dynamicTexture = osSetDynamicTextureDataBlendFace ( "", "vector", drawList, drawParameters, TRUE, 1, 0, 255, activeSide);
 
@@ -597,6 +613,8 @@ default
         if(destCheckIndex >= 0) {
             integer column = destCheckIndex % DESTCOLS;
             destinations = llListReplaceList(destinations, [ data ], destCheckIndex, destCheckIndex);
+            // if(data == "unknown")
+            debug((destCheckIndex-4) + ": " + llList2String(destinations, destCheckIndex -3) + " status " + llToUpper(data));
             //string destinationName = llList2String(destinations, destCheckIndex - column);
             //debug (destinationName + " is " + (string)data);
         } else {
@@ -719,13 +737,13 @@ state teleporting {
     state_entry() {
         debug("entering state teleporting");
         debug("checking " + teleportURI);
-        httpDestCheckId = llRequestSimulatorData(teleportURI, DATA_SIM_STATUS);
+        teleportCheckId = llRequestSimulatorData(teleportURI, DATA_SIM_STATUS);
         llSetTimerEvent (TP_TIMEOUT);
     }
 
     dataserver(key query_id, string data)
     {
-        if(query_id == httpDestCheckId)
+        if(query_id == teleportCheckId)
         {
             if (data == "up")
             {
