@@ -1,7 +1,7 @@
 /*
  * Gudz Teleport Board 2
  *
- * Version:  2.4.3
+ * Version:  2.4.4
  * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
  *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
  * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
@@ -340,7 +340,7 @@ getSource()
 {
     currentStatus = "getSource";
     debug(currentStatus);
-    if(source == "") source = llGetObjectDesc();
+    source = llGetObjectDesc();
     if(source=="") {
         if(llGetInventoryName(INVENTORY_NOTECARD, 0) != CONFIG_FILE)
         source="card://" + llGetInventoryName(INVENTORY_NOTECARD, 0);
