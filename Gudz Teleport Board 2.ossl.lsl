@@ -1,7 +1,7 @@
 /*
  * Gudz Teleport Board 2
  *
- * Version:  2.4.2
+ * Version:  2.4.3
  * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
  *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
  * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
@@ -53,7 +53,7 @@ integer USE_MAP = FALSE; // if set to TRUE, don't teleport agent, just show map
 list ACTIVE_SIDES = [ ALL_SIDES ]; // touch active only on this side.
 integer TEXTURE_WIDTH = 512; // a power of 2: 256, 512, 1024...
 integer TEXTURE_HEIGHT = 512; // a power of 2: 256, 512, 1024...
-key INITIALIZING_TEXTURE = TEXTURE_BLANK;
+key INITIALIZING_TEXTURE = "33412f90-5234-44fb-8d6f-480e5a0ef662";
 
 string FONT_NAME = "Arial"; // A font installed on the simulator computer
 string FONT_COLOR = "Black";
@@ -68,6 +68,7 @@ string BACKGROUND_COLOR  = "DarkGreen"; // "Gray";
 key BACKGROUND_TEXTURE = NULL_KEY;
     // Use NULL_KEY for no texture. Make sure the background texture
     // is not smaller than TEXTURE_WIDTH x TEXTURE_HEIGHT
+
 string CELL_ACTIVE   = "White";
 string CELL_DISABLED   = "IndianRed";
 string CELL_THIS_REGION   = "Green";
@@ -147,7 +148,18 @@ getConfig() {
         }
         else if (var == "TEXTURE_WIDTH") TEXTURE_WIDTH = (integer)val;
         else if (var == "TEXTURE_HEIGHT") TEXTURE_HEIGHT = (integer)val;
-        else if (var == "INITIALIZING_TEXTURE") INITIALIZING_TEXTURE = (key)val;
+        else if (var == "INITIALIZING_TEXTURE") {
+            if(llToUpper(val) == "TEXTURE_BLANK")
+            INITIALIZING_TEXTURE = TEXTURE_BLANK;
+            else if(llToUpper(val) == "TEXTURE_TRANSPARENT" || llToLower(val) == "transparent")
+            INITIALIZING_TEXTURE = TEXTURE_TRANSPARENT;
+            else if(llGetInventoryKey(val))
+            INITIALIZING_TEXTURE = llGetInventoryKey(val);
+            else {
+                debug("using key(val) " + (key)val);
+            }
+            INITIALIZING_TEXTURE = (key)val;
+        }
         else if (var == "FONT_NAME") FONT_NAME = (string)val;
         else if (var == "FONT_COLOR") FONT_COLOR = (string)val;
         else if (var == "COLUMNS") COLUMNS = (integer)val;
@@ -182,6 +194,7 @@ getConfig() {
     } else if(BACKGROUND_COLOR == "") {
         BACKGROUND_COLOR = "transparent";
     }
+
     //debug("active sides " + llGetListLength(ACTIVE_SIDES) + " " + llDumpList2String(ACTIVE_SIDES, ":"));
 }
 readDestFromURL(string url) {
@@ -412,14 +425,15 @@ displayEnd() {
     string renderColor = BACKGROUND_COLOR;
     string dynamicTexture;
 
+    // if(BACKGROUND_TEXTURE == NULL_KEY)
     if(BACKGROUND_TEXTURE == NULL_KEY || destinations == [ "Initializing" ])
-    renderTexture = INITIALIZING_TEXTURE;
+    renderTexture = TEXTURE_BLANK;
+    llSetTexture(renderTexture, activeSide);
 
     if(BACKGROUND_COLOR == "transparent" || renderTexture == TEXTURE_TRANSPARENT) {
         alpha = 0;
         renderColor = "transparent";
     }
-    llSetTexture(renderTexture, activeSide);
 
     string drawParameters = "width:"+(string)(TEXTURE_WIDTH)
     +",height:"+(string)TEXTURE_HEIGHT
@@ -573,9 +587,19 @@ default
     {
         debug("Initializing (entering state default)");
         statusUpdate("Initializing");
+
         getConfig();
         activeSide = llList2Integer(ACTIVE_SIDES, 0);
-        llSetTexture(BACKGROUND_TEXTURE, activeSide);
+
+        debug("active side: " + activeSide + " active sides: " + (string)ACTIVE_SIDES);
+        integer i;
+        for (i=0; i<llGetListLength(ACTIVE_SIDES); i++)
+        {
+            debug("set init " + INITIALIZING_TEXTURE + " texture to side " + llList2Integer(ACTIVE_SIDES, i));
+            llSetTexture(INITIALIZING_TEXTURE, llList2Integer(ACTIVE_SIDES, i));
+        }
+
+        // llSetTexture(BACKGROUND_TEXTURE, activeSide);
         // llSetTexture(INITIALIZING_TEXTURE, activeSide);
         // destinations = ["Initializing"];
         // drawTable();
