@@ -1,7 +1,7 @@
 /*
  * Gudz Teleport Board 2
  *
- * Version:  2.4.4
+ * Version:  2.4.6
  * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
  *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
  * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
@@ -53,7 +53,7 @@ integer USE_MAP = FALSE; // if set to TRUE, don't teleport agent, just show map
 list ACTIVE_SIDES = [ ALL_SIDES ]; // touch active only on this side.
 integer TEXTURE_WIDTH = 512; // a power of 2: 256, 512, 1024...
 integer TEXTURE_HEIGHT = 512; // a power of 2: 256, 512, 1024...
-key INITIALIZING_TEXTURE = "33412f90-5234-44fb-8d6f-480e5a0ef662";
+key INITIALIZING_TEXTURE = "e9616da0-d2f9-45fa-ac79-86e50e0e0457";
 
 string FONT_NAME = "Arial"; // A font installed on the simulator computer
 string FONT_COLOR = "Black";
@@ -79,7 +79,7 @@ integer CELL_BORDER_SIZE  = 5;
 
 integer SHOW_RATING = FALSE; // Wrong results for HG links, good in local grid
 integer REFRESH_DELAY = 43200; // Reload destinations around twice a day
-integer HTTP_TIMEOUT = 5;
+integer HTTP_TIMEOUT = 10;
 integer TP_TIMEOUT = 30;
 integer DELAYED_CHECK = FALSE; // run status checks after rendering the board.
                                // Slower, but better for long lists
@@ -349,6 +349,7 @@ getSource()
     }
     if(source=="card://") {
         llOwnerSay("Datasource " + source + " is not set or not vaild");
+        statusUpdate("No data source");
         destinations = ["No data source", "#", "", "", "Error", ""];
         drawTable();
         destinations = [];
