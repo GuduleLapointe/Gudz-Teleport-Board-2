@@ -1,7 +1,11 @@
 # Gudule's Teleport Board 2
 
-* Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
-*           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
+Get the latest version:
+    https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
+
+* Authors:  Gudule Lapointe <gudule@speculoos.world>
+*           Olivier van Helden <olivier@van-helden.net>
+*           Portions of code by the owner of Avatar Jeff Kelley, 2010
 * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 * Website:  https://speculoos.world/lab
 * Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
@@ -53,6 +57,3 @@ it as much as possible.
    (osDrawFilledRectangle, osDrawRectangle, osDrawText,
    osGetDrawStringSize, osMovePen, osSetFontName, osSetFontSize,
    osSetPenColor, osSetPenSize)
-
-## Licence
-Creative Commons BY-NC-SA
