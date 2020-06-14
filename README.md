@@ -4,12 +4,12 @@ Get the latest version:
     https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 
 * Authors:  Gudule Lapointe <gudule@speculoos.world>
-*           Olivier van Helden <olivier@van-helden.net>
-*           Portions of code by the owner of Avatar Jeff Kelley, 2010
+            Olivier van Helden <olivier@van-helden.net>
+            Portions of code by the owner of Avatar Jeff Kelley, 2010
 * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 * Website:  https://speculoos.world/lab
 * Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
-*           Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
+            Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
 
 ## Features:
 
