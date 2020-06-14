@@ -3,22 +3,25 @@
 Get the latest version:
     https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 
-* Authors:  Gudule Lapointe <gudule@speculoos.world>
-            Olivier van Helden <olivier@van-helden.net>
+* Authors:  Gudule Lapointe gudule@speculoos.world,
+            Olivier van Helden olivier@van-helden.net,            
             Portions of code by the owner of Avatar Jeff Kelley, 2010
 * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
 * Website:  https://speculoos.world/lab
-* Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
-            Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
+* Licence:  AGPLv3 (Affero GPL)
 
 ## Features:
 
 * Single or Multi-columns teleport buttons
-* Destinations statuses are checked at start and every hour to avoid TP to inactive regions
-* Local destinations can be written as HG links and are automatically converted to local links for teleport, so the same board works inside and outside your grid
+* Destinations statuses are checked at start and every hour to avoid TP to
+  inactive regions
+* Local destinations can be written as HG links and are automatically converted
+  to local links for teleport, so the same board works inside and outside your
+  grid
 * Destination source can be set from a notecard or from a web server
 * Immediate TP or map (change USE_MAP in config)
-* Different colors for current region (green) or offline regions (red), customizable
+* Different colors for current region (green) or offline regions (red),
+  customizable
 * Optional background texture
 * Can be formatted with titles (text without url), spacer (|) and column jump (-)
 * Configuration in a separate notecard to allow easy upgrades
@@ -38,7 +41,7 @@ format for backward compatibility but we recommend the simplified format:
 * or `Displayed Name|your.grid:port:Region Name`
 * or `Displayed Name|your.grid:port:Region Name|x,y,z`
 
-Comments:
+Comments and formatting:
 * Empty lines are ignored
 * Lines beginning wish "#" are ignored
 * Lines commented with "//" are sent as message to the owner during initializaton
@@ -54,7 +57,6 @@ it as much as possible.
 * osGetGridGatekeeperURI
 * osGetNotecard
 * osTeleportAgent
-* osSetDynamicTextureDataBlendFace and related
-   (osDrawFilledRectangle, osDrawRectangle, osDrawText,
-   osGetDrawStringSize, osMovePen, osSetFontName, osSetFontSize,
-   osSetPenColor, osSetPenSize)
+* osSetDynamicTextureDataBlendFace and related (osDrawFilledRectangle,
+  osDrawRectangle, osDrawText, osGetDrawStringSize, osMovePen, osSetFontName,
+  osSetFontSize, osSetPenColor, osSetPenSize)
