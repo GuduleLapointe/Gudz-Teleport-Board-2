@@ -34,7 +34,7 @@ The destination list can be set by 3 ways
 
 In previous versions, the destination list used 5 values. We accept this old
 format for backward compatibility but we recommend the simplified format:
-*    Displayed Name|your.grid:port
+* Displayed Name|your.grid:port
 * or Displayed Name|your.grid:port:Region Name
 * or Displayed Name|your.grid:port:Region Name|x,y,z
 
