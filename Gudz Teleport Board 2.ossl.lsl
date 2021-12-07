@@ -544,7 +544,7 @@ integer action(integer index, key who) {
     list destination = llList2List(destinations, listIndex, listIndex + DESTCOLS - 1);
     string destName = llList2String(destination, 0);
     string destURI = llList2String(destination, 1);
-    string destLanding = llList2String(destination, 2);
+    vector destLanding = (vector)llList2String(destination, 2);
     string destStatus = llList2String(destination, 4);
 
     destURI  = strReplace(destURI, "http://", "");
@@ -559,14 +559,14 @@ integer action(integer index, key who) {
     llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + destLanding);
     // Préparer les globales avant de sauter
     if (USE_MAP) {
-        llMapDestination (destURI, destLanding, ZERO_VECTOR);
+        llMapDestination (destURI, (vector)destLanding, ZERO_VECTOR);
         return TRUE;
     }
 
     teleportAgent = who;
     teleportURI = destURI;
-    if(destLanding == "" || destLanding == "0,0,0")
-    teleportLanding = "128,128,25";
+    if((string)destLanding == "" || (string)destLanding == "0,0,0")
+    teleportLanding = (vector)"128,128,25";
     else teleportLanding = destLanding;
 
 
