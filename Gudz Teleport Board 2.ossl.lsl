@@ -1,7 +1,7 @@
 /*
  * Gudz Teleport Board 2
  *
- * Version:  2.4.6
+ * Version:  2.4.8
  * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
  *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
  * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
@@ -556,7 +556,7 @@ integer action(integer index, key who) {
     {
         llInstantMessage(who, "Last time I checked, " + destName + " was " + destStatus + " but I will try");
     }
-    llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + destLanding);
+    llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + (string)destLanding);
     // Préparer les globales avant de sauter
     if (USE_MAP) {
         llMapDestination (destURI, (vector)destLanding, ZERO_VECTOR);
