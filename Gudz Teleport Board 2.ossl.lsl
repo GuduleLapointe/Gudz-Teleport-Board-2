@@ -1,17 +1,14 @@
 /*
  * Gudz Teleport Board 2
  *
- * Version:  2.4.8
+ * Version:  2.5.6
  * Authors:  Olivier van Helden <olivier@van-helden.net>, Gudule Lapointe
- *           Portions of code (c) The owner of Avatar Jeff Kelley, 2010
  * Source:   https://git.magiiic.com/opensimulator/Gudz-Teleport-Board-2
  * Website:  https://speculoos.world/lab
- * Licence:  2.4.2 or superior: AGPLv3 (Affero GPL)
- *           Prior to v2.4.2:   Creative Commons BY-NC-SA up to version 2.4.1
+ * Licence:  AGPLv3 (Affero GPL)
  *
  * This is a complete rewrite of Gudule's 2016 HGBoard, which was an adaptation
- * of Jeff Kelley' 2010 HGBoard script. Very few of Jeff's original code was
- * kept (mainly the drawing engine).
+ * of Jeff Kelley' 2010 HGBoard script.
  *
  * Contributing:
  * If you improve this software, please give back to the community, by
@@ -112,6 +109,60 @@ vector teleportLanding;
 string currentStatus;
 string sourceType;
 float touchStarted;
+
+// Change only in your master script
+string scrupURL = "https://speculoos.world/scrup/scrup.php"; // Change to your scrup.php URL
+integer scrupAllowUpdates = TRUE; // should always be true, except for debug
+
+string loginURI; // will be set by scrup() function
+string scrupRequestID; // will be set dynamically
+integer scrupSayVersion = TRUE; // to owner, after start or update
+integer scrupPin;// will be set dynamically
+string version; // do not set here, it will be fetched from the script name
+
+scrup(integer enable) {
+    // Uncomment the loginURI for your platform, comment or delete other line
+    loginURI = osGetGridLoginURI();  // If in OpenSimulator
+    // loginURI = "secondlife://";      // If in Second Life
+
+    if(loginURI == "" || scrupURL == "" |! scrupAllowUpdates |! enable)  { llSetRemoteScriptAccessPin(0); return; }
+
+    string scrupLibrary = "1.1.0";
+    version = ""; list parts=llParseString2List(llGetScriptName(), [" "], []);
+    integer i = 1; do {
+        string part = llList2String(parts, i);
+        string main = llList2String(llParseString2List(part, ["-"], []), 0);
+        if(llGetListLength(llParseString2List(main, ["."], [])) > 1
+        && (integer)llDumpList2String(llParseString2List(main, ["."], []), "")) {
+            version = part;
+            jump break;
+        }
+    } while (i++ < llGetListLength(parts)-1 );
+    if(version == "") { scrup(FALSE); return; }
+    @break;
+    list scriptInfo = [ llDumpList2String(llList2List(parts, 0, i - 1), " "), version ];
+    string scriptname = llList2String(scriptInfo, 0);
+    version = llList2String(scriptInfo, 1);
+    if(scrupSayVersion) llOwnerSay(scriptname + " version " + version);
+    scrupSayVersion = FALSE;
+
+    if(llGetStartParameter() != 0) { i=0; do {
+        string found = llGetInventoryName(INVENTORY_SCRIPT, i);
+        if(found != llGetScriptName() && llSubStringIndex(found, scriptname + " ") == 0) {
+            llOwnerSay("deleting duplicate '" + found + "'");
+            llRemoveInventory(found);
+        }
+    } while (i++ < llGetInventoryNumber(INVENTORY_SCRIPT)-1); }
+
+    scrupPin = (integer)(llFrand(999999999) + 56748);
+    list params = [ "loginURI=" + loginURI, "action=register",
+    "type=client", "linkkey=" + (string)llGetKey(), "scriptname=" + scriptname,
+    "pin=" + (string)scrupPin, "version=" + version, "scrupLibrary=" + scrupLibrary ];
+    scrupRequestID = llHTTPRequest(scrupURL, [HTTP_METHOD, "POST",
+    HTTP_MIMETYPE, "application/x-www-form-urlencoded"],
+    llDumpList2String(params, "&"));
+    llSetRemoteScriptAccessPin(scrupPin);
+}
 
 string strReplace(string str, string search, string replace) {
     return llDumpList2String(llParseStringKeepNulls((str),[search],[]),replace);
@@ -556,7 +607,7 @@ integer action(integer index, key who) {
     {
         llInstantMessage(who, "Last time I checked, " + destName + " was " + destStatus + " but I will try");
     }
-    llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ") " + (string)destLanding);
+    llInstantMessage(who, "You have selected "+ destName + " (" + destURI + ")");
     // Préparer les globales avant de sauter
     if (USE_MAP) {
         llMapDestination (destURI, (vector)destLanding, ZERO_VECTOR);
@@ -565,10 +616,9 @@ integer action(integer index, key who) {
 
     teleportAgent = who;
     teleportURI = destURI;
-    if((string)destLanding == "" || (string)destLanding == "0,0,0")
+    if((string)destLanding == "" || destLanding == ZERO_VECTOR)
     teleportLanding = (vector)"128,128,25";
     else teleportLanding = destLanding;
-
 
     debug("teleporting to " + teleportURI);
     state teleporting;
@@ -586,6 +636,7 @@ default
 {
     state_entry()
     {
+        scrup(ACTIVE);
         debug("Initializing (entering state default)");
         statusUpdate("Initializing");
 
@@ -622,7 +673,8 @@ default
     changed(integer change)
     {
         if (change & CHANGED_REGION) llResetScript();
-        if (change & CHANGED_INVENTORY) llResetScript();
+        if (change & CHANGED_REGION_START) llResetScript();
+        // if (change & CHANGED_INVENTORY) {llResetScript();
     }
 
     http_response(key id,integer status, list meta, string body) {
@@ -663,6 +715,7 @@ state ready {
     state_entry()
     {
         debug("Entering state ready");
+        scrup(ACTIVE);
         firstRun = FALSE;
         statusUpdate("");
         teleportAgent = NULL_KEY;
@@ -730,8 +783,9 @@ state ready {
     }
 
     changed(integer change) {
-        if (change & CHANGED_INVENTORY) llResetScript();
         if (change & CHANGED_REGION) llResetScript();
+        if (change & CHANGED_REGION_START) llResetScript();
+        // if (change & CHANGED_INVENTORY) llResetScript();
     }
     timer()
     {
@@ -760,6 +814,7 @@ state ready {
 state teleporting {
 
     state_entry() {
+        scrup(FALSE);
         debug("entering state teleporting");
         debug("checking " + teleportURI);
         teleportCheckId = llRequestSimulatorData(teleportURI, DATA_SIM_STATUS);
